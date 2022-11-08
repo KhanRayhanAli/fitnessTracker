@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 const client = require('./client');
 
 async function getRoutineById(id){
@@ -17,11 +18,11 @@ async function getRoutineById(id){
 
 async function getRoutinesWithoutActivities(){
   try {
-    const {rows: [routine]} = await client.query (`
+    const {rows} = await client.query (`
       SELECT *
       FROM routines
     `)
-    return routine
+    return rows
   } catch (error) {
     throw (error)
   }

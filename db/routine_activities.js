@@ -17,6 +17,7 @@ async function addActivityToRoutine({
     `, [routineId, activityId, count, duration])
     return routineActivity
   } catch (error) {
+    console.log('Failed to add Activity to Routine')
     throw error
   }
     
