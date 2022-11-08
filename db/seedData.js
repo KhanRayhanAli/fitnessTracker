@@ -7,8 +7,10 @@ async function dropTables() {
   // drop all tables, in the correct order
  try {
   await client.query(`
-  DROP TABLE IF EXISTS users;
+  DROP TABLE IF EXISTS routine_activities;
+  DROP TABLE IF EXISTS routines;
   DROP TABLE IF EXISTS activities;
+  DROP TABLE IF EXISTS users;
   `)
   } 
   catch (error) {
@@ -233,7 +235,7 @@ async function rebuildDB() {
     await createInitialUsers()
     await createInitialActivities()
     await createInitialRoutines()
-    await createInitialRoutineActivities()
+    // await createInitialRoutineActivities()
   } catch (error) {
     console.log("Error during rebuildDB")
     throw error
