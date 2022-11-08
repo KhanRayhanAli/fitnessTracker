@@ -14,7 +14,7 @@ const {
 } = require("../../db");
 const { createFakeUser } = require("../helpers");
 
-xdescribe("DB Users", () => {
+describe("DB Users", () => {
 
 
   xdescribe("createUser({ username, password })", () => {
@@ -76,7 +76,7 @@ xdescribe("DB Users", () => {
 
   });
 
-  xdescribe("getUser({ username, password })", () => {
+  describe("getUser({ username, password })", () => {
 
     it("returns the user when the password verifies", async () => {
       const fakeUserData = {

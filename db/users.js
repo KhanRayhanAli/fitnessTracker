@@ -23,7 +23,7 @@ async function getUser({ username, password }) {
     const { rows } = await client.query(`
       SELECT username, password
       FROM users;
-`); 
+`, [username, password]); 
 
       return rows;
   } 
