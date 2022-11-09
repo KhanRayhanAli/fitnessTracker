@@ -17,7 +17,7 @@ let userToAdd = {username, hashedPassword }
       ON CONFLICT (username) DO NOTHING
       RETURNING *;
       `, [username, hashedPassword]);
-
+    
       return user;
   } catch (error) {
     console.log('Create User Error')
@@ -36,8 +36,8 @@ async function getUser({ username, password }) {
 // `, [username, password]); 
 
 if (passwordsMatch) {
-      return user;} 
-      else {
+      return user;
+    } else {
         throw 'Whaaaatttt????'
       }
   } 
