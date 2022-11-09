@@ -47,7 +47,10 @@ async function attachActivitiesToRoutines(routines) {
   const routinesToReturn = [...routines];
   const binds = routines.map((_, index) => `$${index + 1}`).join(', ');
   const routineIds = routines.map(routine => routine.id);
-  if (!routineIds?.length) return [];
+  // if (!routineIds?.length) return [];
+  if (!routineIds || routineIds.length === 0) {
+    return [];
+  }
   
   try {
     // get the activities, JOIN with routine_activities (so we can get a routineId), and only those that have those routine ids on the routine_activities join
