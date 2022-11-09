@@ -46,10 +46,10 @@ async function getAllRoutines() {
 async function getAllRoutinesByUser({username}) {
   try {
     const { rows } = await client.query (`
-      SELECT users.*
-      FROM users
+      SELECT routines.*, users.username AS "creatorName"
+      FROM routines
       JOIN users ON routines."creatorId" = users.id
-      WHERE "creatorId"=$1;
+      WHERE username = $1
     `, [username])
     console.log('These are your routines:', rows)
     return attachActivitiesToRoutines(rows)
@@ -61,13 +61,14 @@ async function getAllRoutinesByUser({username}) {
 async function getPublicRoutinesByUser({username}) {
   try {
     const { rows } = await client.query (`
-    SELECT id
+    SELECT routines.*, users.username AS "creatorName"
     FROM routines
-    WHERE "creatorId"=$1
-    AND "isPublic"=true;
+    JOIN users ON routines."creatorId" = users.id
+    WHERE username =$1
+    AND routines."isPublic"=true;
     `, [username])
-    return rows
-  } catch (error) {
+    return attachActivitiesToRoutines(rows
+)  } catch (error) {
     throw (error)
   }
 }
@@ -78,7 +79,7 @@ async function getAllPublicRoutines() {
     SELECT routines.*, users.username AS "creatorName"
     FROM routines
     JOIN users ON routines."creatorId" = users.id
-    WHERE  "isPublic"=true;
+    WHERE "isPublic"=true;
     `)
     return attachActivitiesToRoutines(rows)
   } catch (error) {
@@ -117,9 +118,39 @@ async function createRoutine({creatorId, isPublic, name, goal}) {
 }
 
 async function updateRoutine({id, ...fields}) {
+  const setString = Object.keys(fields).map(
+    (key, index) => `"${ key }"=$${ index + 1 }`
+  ).join(', ');
+
+  if (setString.length === 0) {
+    return;
+  }
+
+  try {
+    const {rows: [ routine ] } = await client.query(`
+    UPDATE routines
+    SET ${setString}
+    WHERE id=${id}
+    RETURNING *;
+    `, Object.values(fields));
+
+    return routine
+  }catch (error) {
+    throw error
+  }
 }
 
 async function destroyRoutine(id) {
+  try{
+    const { rows } = await client.query(`
+    DELETE FROM routines.*, routine_activities.*
+    JOIN routine_activities ON routine_activities."routineId" = routines.id
+    WHERE routines.id= ${id}`, [id])
+
+    return rows
+  }catch (error) {
+    throw error
+  }
 }
 
 module.exports = {
