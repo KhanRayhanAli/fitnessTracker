@@ -15,9 +15,10 @@ let userToAdd = {username, hashedPassword }
       INSERT INTO users(username, password)
       VALUES($1, $2)
       ON CONFLICT (username) DO NOTHING
-      RETURNING *;
+      RETURNING username, id;
       `, [username, hashedPassword]);
     
+      // delete user.password
       return user;
   } catch (error) {
     console.log('Create User Error')
@@ -27,6 +28,9 @@ let userToAdd = {username, hashedPassword }
 
 async function getUser({ username, password }) {
     const user = await getUserByUsername(username);
+    if (!user) {
+      return null
+    }
     const hashedPassword = user.password;
     let passwordsMatch = await bcrypt.compare(password, hashedPassword) 
 
@@ -36,16 +40,17 @@ async function getUser({ username, password }) {
 // `, [username, password]); 
 
 if (passwordsMatch) {
+      delete user.password
       return user;
     } else {
-        throw 'Whaaaatttt????'
+        return null
       }
   } 
   
 async function getUserById(userId) {
   try {
     const { rows: [user] } = await client.query(`
-      SELECT * FROM users
+      SELECT id, username FROM users
       WHERE id = ${userId}
     `)
     // if(!user){
