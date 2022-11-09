@@ -3,7 +3,7 @@ const client = require("./client")
 // database functions
 async function getAllActivities() {
   const { rows } = await client.query(
-    `SELECT id
+    `SELECT *
     FROM activities;`
   )
 
