@@ -35,7 +35,7 @@ async function getAllRoutines() {
     const { rows } = await client.query (`
     SELECT routines.*, users.username AS "creatorName"
     FROM routines
-    JOIN users ON routines."creatorId" = users.id
+    JOIN users ON routines."creatorId" = users.id;
     `)
     return attachActivitiesToRoutines(rows)
   } catch (error) {
@@ -49,7 +49,7 @@ async function getAllRoutinesByUser({username}) {
       SELECT routines.*, users.username AS "creatorName"
       FROM routines
       JOIN users ON routines."creatorId" = users.id
-      WHERE username = $1
+      WHERE username = $1;
     `, [username])
     console.log('These are your routines:', rows)
     return attachActivitiesToRoutines(rows)
@@ -95,7 +95,7 @@ async function getPublicRoutinesByActivity({id}) {
     JOIN users ON routines."creatorId" = users.id
     JOIN routine_activities ON routine_activities."routineId" = routines.id
     WHERE routines."isPublic"=true
-    AND routine_activities."activityId"=$1
+    AND routine_activities."activityId"=$1;
     `, [id])
     return attachActivitiesToRoutines(rows)
   } catch (error) {
@@ -143,10 +143,10 @@ async function updateRoutine({id, ...fields}) {
 async function destroyRoutine(id) {
   try{
     const { rows } = await client.query(`
-    DELETE FROM routines.*, routine_activities.*
-    JOIN routine_activities ON routine_activities."routineId" = routines.id
-    WHERE routines.id= ${id}`, [id])
-
+    DELETE FROM routines
+    WHERE id=$1;
+    `, [id])
+  
     return rows
   }catch (error) {
     throw error
