@@ -1,7 +1,9 @@
 const client = require("./client");
 const bcrypt = require('bcrypt')
+const { SALT_COUNT } = process.env;
 
-const SALT_COUNT = 10;
+
+// const SALT_COUNT = 10;
 // database functions
 
 // user functions
