@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 const client = require("./client");
 const bcrypt = require('bcrypt')
 const { SALT_COUNT } = process.env;
@@ -7,24 +8,39 @@ const { SALT_COUNT } = process.env;
 // database functions
 
 // user functions
-async function createUser({ username, password }) {
+// async function createUser({ username, password }) {
 
-const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
-let userToAdd = {username, hashedPassword }
+// const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
+// let userToAdd = {username, hashedPassword }
 
+//   try {
+//     const { rows: [user] } = await client.query(`
+//       INSERT INTO users(username, password)
+//       VALUES($1, $2)
+//       ON CONFLICT (username) DO NOTHING
+//       RETURNING username, id;
+//       `, [username, hashedPassword]);
+    
+//       // delete user.password
+//       return user;
+//   } catch (error) {
+//     console.log('Create User Error')
+//     throw error;
+//   }
+// }
+
+async function createUser({username, password}) {
   try {
-    const { rows: [user] } = await client.query(`
+    const {rows: [user]} = await client.query(`
       INSERT INTO users(username, password)
       VALUES($1, $2)
       ON CONFLICT (username) DO NOTHING
       RETURNING username, id;
-      `, [username, hashedPassword]);
-    
-      // delete user.password
+      `, [username, password])
+
       return user;
   } catch (error) {
-    console.log('Create User Error')
-    throw error;
+    throw error
   }
 }
 
