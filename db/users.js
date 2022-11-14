@@ -49,15 +49,15 @@ async function getUser({ username, password }) {
     if (!user) {
       return null
     }
-    const hashedPassword = user.password;
-    let passwordsMatch = await bcrypt.compare(password, hashedPassword) 
+    // const hashedPassword = user.password;
+    // let passwordsMatch = await bcrypt.compare(password, hashedPassword) 
 
 //     const { rows } = await client.query(`
 //       SELECT username, password
 //       FROM users;
 // `, [username, password]); 
 
-if (passwordsMatch) {
+if (user && password == user.password) {
       delete user.password
       return user;
     } else {

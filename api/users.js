@@ -1,6 +1,6 @@
 const express = require('express');
 const usersRouter = express.Router();
-const {getUserByUsername, createUser} = require('../db/users')
+const {getUserByUsername, createUser} = require('../db')
 const {getAllRoutinesByUser, getPublicRoutinesByUser} = require('../db/routines')
 const {requireUser} = require('./utils')
 const jwt = require("jsonwebtoken");
@@ -44,7 +44,7 @@ usersRouter.post("/login", async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    console.log(error, 'error1');
     next(error);
   }
 });
@@ -53,7 +53,9 @@ usersRouter.post("/login", async (req, res, next) => {
 
 usersRouter.post('/register', async (req, res, next) => {
     const { username, password } = req.body;
-    
+
+    try {
+
     if (!username || !password) {
       next({
         name: "MissingCredentialsError",
@@ -63,19 +65,19 @@ usersRouter.post('/register', async (req, res, next) => {
 
     if(password.length < 8) {
       next ({
-        name: 'PasswordError', 
+        name: 'PasswordLengthError', 
         message: 'Password must be at least 8 characters'
       });
     }
     
-    try {
       const _user = await getUserByUsername(username);
       
       if (_user) {
         next({
           name: 'UserExistsError',
-          message: `${username} is already taken. Please try a different one.`
-        });
+          message: `${username} is already taken. Please try a different one.`,
+          error: 'UserExistsError'
+        }); 
       } else {
         const user = await createUser({username, password
       });
@@ -88,8 +90,8 @@ usersRouter.post('/register', async (req, res, next) => {
         user
       })
     }
-    } catch ({ name, message }) {
-      next({ name, message })
+    } catch (error) {
+      next(error)
     } 
   });
 
@@ -100,6 +102,7 @@ usersRouter.get('/me', requireUser, async (req, res, next) => {
     res.send(req.user)
   }
   catch(error) {
+    console.log(error, 'error2')
     next(error);
   }
 })
