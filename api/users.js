@@ -53,38 +53,39 @@ usersRouter.post("/login", async (req, res, next) => {
 
 // POST /api/users/register
 
-usersRouter.post("/register",async (req, res, next) =>{
-	
-	const { username, password } = req.body;
-	if (!username || !password) {
-		next({
-		name: "MissingCredentialsError",
-		message: "Please supply both a username and password",
-		});
-	}
-	if(password.length < 8){
-		next({
-			name:"PasswordLengthError",
-			message:"Password Too Short!"});
-	}
-	try {
-		const _user = await getUserByUsername(username);
-		if( _user ){
-			next({
-				name: "UserExistError",
-				message: `User ${username} is already taken.`,
-			})
-		}else {
-		console.log(username)
-		const user = await createUser({username, password});
-		const token = jwt.sign({ id: user.id, username }, JWT_SECRET, {
-			expiresIn: "1w",
-		});
-		res.send({ message: "Thank you for signing up!", token, user})}
-	} catch({ name, message }) {
-		next({ name, message });
-	}
-})
+usersRouter.post("/register", async (req, res, next) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    next({
+      name: "MissingCredentialsError",
+      message: "Please supply both a username and password",
+    });
+  }
+  if (password.length < 8) {
+    next({
+      name: "PasswordLengthError",
+      message: "Password Too Short!",
+    });
+  }
+  try {
+    const _user = await getUserByUsername(username);
+    if (_user) {
+      next({
+        name: "UserExistError",
+        message: `User ${username} is already taken.`,
+      });
+    } else {
+      console.log(username);
+      const user = await createUser({ username, password });
+      const token = jwt.sign({ id: user.id, username }, JWT_SECRET, {
+        expiresIn: "1w",
+      });
+      res.send({ message: "Thank you for signing up!", token, user });
+    }
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
 
 // usersRouter.post("/register", async (req, res, next) => {
 //   const { username, password } = req.body;
@@ -94,7 +95,7 @@ usersRouter.post("/register",async (req, res, next) =>{
 //         message: "Password Too Short!"
 //       });
 //     }
-    
+
 //   try {
 //     if (!username || !password) {
 //       next({
@@ -102,8 +103,6 @@ usersRouter.post("/register",async (req, res, next) =>{
 //         message: "Please supply both a username and password",
 //       });
 //     }
-
-  
 
 //     const _user = await getUserByUsername(username);
 
@@ -146,15 +145,21 @@ usersRouter.get("/me", requireUser, async (req, res, next) => {
 
 usersRouter.get("/:username/routines", async (req, res, next) => {
   const { username } = req.params;
-
+  console.log("this is", username);
   try {
-    const allUsers = await getAllRoutinesByUser(username);
+    const routinesFromDB = await getAllRoutinesByUser({ username });
+    const publicRoutines = await getPublicRoutinesByUser({ username });
 
-    const routines = allUsers.filter((routine) => {
-      return routine.active || (req.user && routine.author.id === req.user.id);
-    });
+    console.log("these are", publicRoutines);
+    // const routinesFiltered = routinesFromDB.filter((routine) => {
+    //   return routine.active || (req.user && routine.author.id === req.user.id);
+    // });
 
-    res.send({ routines: routines });
+    // if (username) {
+    //   return routinesFromDB
+    // }
+
+    res.send(publicRoutines);
   } catch (error) {
     next(error);
   }
