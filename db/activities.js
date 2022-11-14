@@ -94,8 +94,8 @@ async function createActivity({ name, description }) {
 // don't try to update the id
 // do update the name and description
 // return the updated activity
-async function updateActivity({ id, ...fields}) 
-{ console.log(id, fields)
+async function updateActivity({ id, ...fields}) { 
+  // console.log(id, fields)
   const setString = Object.keys(fields).map(
     (key, index) => `"${ key }"=$${ index + 1 }`
   ).join(', ');

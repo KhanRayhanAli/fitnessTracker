@@ -1,6 +1,6 @@
 const express = require('express');
 const { getPublicRoutinesByActivity } = require('../db');
-const { getAllActivities, createActivity, getActivityByName } = require('../db/activities');
+const { getAllActivities, createActivity, getActivityByName, updateActivity, getActivityById } = require('../db/activities');
 const { requireUser } = require('./utils')
 const activitiesRouter = express.Router();
 
@@ -14,10 +14,10 @@ activitiesRouter.use((req,res, next) => {
 // GET /api/activities/:activityId/routines
 
 activitiesRouter.get('/:activityId/routines', async (req, res, next) => {
-    const { id } = req.params;
+    const { activityId: id } = req.params;
 
     // try {
-    const routines = await getPublicRoutinesByActivity(id);
+    const routines = await getPublicRoutinesByActivity({id});
 
     // if (routines) {
         res.send(routines)})
@@ -46,8 +46,6 @@ activitiesRouter.post('/', requireUser, async (req, res, next) => {
     const { name, description = ""} = req.body;
 
     const activityData = { name, description };
-    
-    // console.log('this is', activityData)
 
     try {
         
@@ -58,16 +56,6 @@ activitiesRouter.post('/', requireUser, async (req, res, next) => {
                     name: "ActivityExistsError",
                     message: `An activity with name ${name} already exists`
                 })}
-        // console.log('Hello this is', allActivities)
-       
-        // console.log('bonjour', newActivity)
-        
-        // existingActivities.map((activity) => {
-        //     // console.log('hola', activity)
-        //     if( newActivity.name == activity.name) {
-        //         // console.log('aloha', newActivity.name, activity.name)
-               
-        //     } 
                 else { 
                 const newActivity = await createActivity(activityData);
                  res.send(newActivity)
@@ -77,18 +65,38 @@ activitiesRouter.post('/', requireUser, async (req, res, next) => {
     }  })
  
 
-        // if (activity) {
-            // res.send(newActivity);
-        // } else {
-        //     next({
-        //         name: "CreateActivityError",
-        //         message: "Failure to create new activity"
-        //     })
-        // }
- 
-
 // PATCH /api/activities/:activityId
 
+activitiesRouter.patch("/:activityId", async (req, res, next) => {
+    const {activityId: id} = req.params
+    const fields = req.body
+    // const activity = await getActivityById(id)
+   try {
+    const activityWithId = await getActivityById(id)
+    if (!activityWithId) {
+        next({
+            error: "Activity Does Not Exist",
+            name: "Activity Does Not Exist",
+            message: `Activity ${id} not found`
+        })
+    }
+    const activityWithName= await getActivityByName(fields.name)
+    if (activityWithName) {
+        next({
+            error: "Activity Does Not Exist",
+            name: "Activity Does Not Exist",
+            message: `An activity with name ${fields.name} already exists`
+        })
+    }
+    // console.log("hello", fields)
+    const updatedActivity = await updateActivity({id, ...fields})
+    
+    
+    res.send(updatedActivity)
+} catch (error) {
+    console.error(error)
+}
+})
 
 
 module.exports = activitiesRouter;

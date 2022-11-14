@@ -15,7 +15,7 @@ routineActivitiesRouter.use((req,res, next) => {
 
 routineActivitiesRouter.delete('/:routineActivityId', requireUser, async (req, res, next) => {
     try {
-      const routineActivity = await getRoutineActivityById(req.params.routineId);
+      const routineActivity = await getRoutineActivityById({id:req.params.routineActivityId});
   
       if (routineActivity && routineActivity.author.id === req.user.id) {
         const updatedRoutineActivity = await updateRoutineActivity(routineActivity.id, { active: false });

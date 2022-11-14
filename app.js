@@ -12,6 +12,10 @@ app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
 const apiRouter = require('./api')
+app.use('/', async (req, res, next) => {
+  console.log("req.body", req.body)
+  next()
+})
 app.use('/api', apiRouter)
 
 
