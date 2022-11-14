@@ -53,50 +53,83 @@ usersRouter.post("/login", async (req, res, next) => {
 
 // POST /api/users/register
 
-usersRouter.post("/register", async (req, res, next) => {
-  const { username, password } = req.body;
-  if (password.length < 8) {
-      next({
-        name: "PasswordLengthError",
-        message: "Password Too Short!"
-      });
-    }
+usersRouter.post("/register",async (req, res, next) =>{
+	
+	const { username, password } = req.body;
+	if (!username || !password) {
+		next({
+		name: "MissingCredentialsError",
+		message: "Please supply both a username and password",
+		});
+	}
+	if(password.length < 8){
+		next({
+			name:"PasswordLengthError",
+			message:"Password Too Short!"});
+	}
+	try {
+		const _user = await getUserByUsername(username);
+		if( _user ){
+			next({
+				name: "UserExistError",
+				message: `User ${username} is already taken.`,
+			})
+		}else {
+		console.log(username)
+		const user = await createUser({username, password});
+		const token = jwt.sign({ id: user.id, username }, JWT_SECRET, {
+			expiresIn: "1w",
+		});
+		res.send({ message: "Thank you for signing up!", token, user})}
+	} catch({ name, message }) {
+		next({ name, message });
+	}
+})
+
+// usersRouter.post("/register", async (req, res, next) => {
+//   const { username, password } = req.body;
+//   if (password.length < 8) {
+//       next({
+//         name: "PasswordLengthError",
+//         message: "Password Too Short!"
+//       });
+//     }
     
-  try {
-    if (!username || !password) {
-      next({
-        name: "MissingCredentialsError",
-        message: "Please supply both a username and password",
-      });
-    }
+//   try {
+//     if (!username || !password) {
+//       next({
+//         name: "MissingCredentialsError",
+//         message: "Please supply both a username and password",
+//       });
+//     }
 
   
 
-    const _user = await getUserByUsername(username);
+//     const _user = await getUserByUsername(username);
 
-    if (_user) {
-      next({
-        name: "UserExistsError",
-        message: `${username} is already taken. Please try a different one.`,
-        error: "UserExistsError",
-      });
-    } else {
-      const user = await createUser({ username, password });
+//     if (_user) {
+//       next({
+//         name: "UserExistsError",
+//         message: `${username} is already taken. Please try a different one.`,
+//         error: "UserExistsError",
+//       });
+//     } else {
+//       const user = await createUser({ username, password });
 
-      const token = jwt.sign({ id: user.id, username }, JWT_SECRET, {
-        expiresIn: "1w",
-      });
+//       const token = jwt.sign({ id: user.id, username }, JWT_SECRET, {
+//         expiresIn: "1w",
+//       });
 
-      res.send({
-        message: "thank you for signing up",
-        token,
-        user,
-      });
-    }
-  } catch (error) {
-    next();
-  }
-});
+//       res.send({
+//         message: "thank you for signing up",
+//         token,
+//         user,
+//       });
+//     }
+//   } catch (error) {
+//     next();
+//   }
+// });
 
 // GET /api/users/me
 
