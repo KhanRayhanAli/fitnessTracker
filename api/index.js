@@ -32,7 +32,7 @@ router.use(async (req, res, next) => {
     }
   });
 // GET /api/health
-router.get('/health', async (req, res)=> {
+router.get('/health', async (req, res, next)=> {
     const message = "All Is Well";
     res.send({name: "health", message: message})
 });
@@ -53,7 +53,7 @@ router.use('/routines', routinesRouter);
 const routineActivitiesRouter = require('./routineActivities');
 router.use('/routine_activities', routineActivitiesRouter);
 
-router.use((error, req, res) => {
+router.use((error, req, res, next) => {
     res.send({
       name: error.name,
       message: error.message,
