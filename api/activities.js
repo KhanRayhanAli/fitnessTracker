@@ -1,6 +1,6 @@
 const express = require('express');
 const { getPublicRoutinesByActivity } = require('../db');
-const { getAllActivities, createActivity } = require('../db/activities');
+const { getAllActivities, createActivity, getActivityByName } = require('../db/activities');
 const { requireUser } = require('./utils')
 const activitiesRouter = express.Router();
 
@@ -46,22 +46,46 @@ activitiesRouter.post('/', requireUser, async (req, res, next) => {
     const { name, description = ""} = req.body;
 
     const activityData = { name, description };
+    
+    // console.log('this is', activityData)
 
     try {
-        const activity = await createActivity(activityData);
+        
+        const existingActivity = await getActivityByName(name);
 
-        if (activity) {
-            res.send({ activity});
-        } else {
-            next({
-                name: "CreateActivityError",
-                message: "Failure to create new activity"
-            })
-        }
-    } catch ({ name, message }) {
-        next({ name, message })
-    }
-})
+        if(existingActivity) { next({
+                    error: "ActivityExistsError",
+                    name: "ActivityExistsError",
+                    message: `An activity with name ${name} already exists`
+                })}
+        // console.log('Hello this is', allActivities)
+       
+        // console.log('bonjour', newActivity)
+        
+        // existingActivities.map((activity) => {
+        //     // console.log('hola', activity)
+        //     if( newActivity.name == activity.name) {
+        //         // console.log('aloha', newActivity.name, activity.name)
+               
+        //     } 
+                else { 
+                const newActivity = await createActivity(activityData);
+                 res.send(newActivity)
+            }
+   } catch (error) {
+        next(error.name)
+    }  })
+ 
+
+        // if (activity) {
+            // res.send(newActivity);
+        // } else {
+        //     next({
+        //         name: "CreateActivityError",
+        //         message: "Failure to create new activity"
+        //     })
+        // }
+ 
 
 // PATCH /api/activities/:activityId
 
